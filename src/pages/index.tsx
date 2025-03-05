@@ -3,7 +3,7 @@ import { HomeContainer, Product } from "@/styles/pages/home";
 import Image from "next/image";
 import 'keen-slider/keen-slider.min.css';
 import { stripe } from '@/lib/stripe';
-import {  GetStaticProps } from 'next';
+import { GetStaticProps } from 'next';
 import Stripe from 'stripe';
 
 
@@ -34,7 +34,7 @@ export default function Home({ products }: HomeProps) {
             <Image src={product.imageUrl} width={520} height={480} alt={`Imagem da ${product.name}`} />
             <footer>
               <strong>{product.name}</strong>
-              <span>R$ {product.price.toFixed(2)}</span>
+              <span>{product.price}</span>
             </footer>
           </Product>
         )
@@ -67,7 +67,7 @@ export default function Home({ products }: HomeProps) {
 // }
 
 
-export const getStaticProps: GetStaticProps= async () => {
+export const getStaticProps: GetStaticProps = async () => {
   const response = await stripe.products.list({
     expand: ['data.default_price'],
   });
@@ -78,7 +78,10 @@ export const getStaticProps: GetStaticProps= async () => {
       id: product.id,
       name: product.name,
       imageUrl: product.images[0],
-      price: (price.unit_amount ?? 0) / 100,
+      price: new Intl.NumberFormat('pt-BR', {
+        style: 'currency',
+        currency: 'BRL',
+      }).format((price.unit_amount ?? 0) / 100),
     }
   });
   return {
